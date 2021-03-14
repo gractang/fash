@@ -10,6 +10,7 @@ JOBS = "jobs"
 BG = "bg"
 FG = "fg"
 PIPE = " | "
+GOODBYE = "My battery is low and it's getting dark..."
 
 BUILTINS = [CD, PWD, JOBS, BG, FG, EXIT]
 
@@ -18,13 +19,14 @@ def tash_cd(file_path):
 		os.chdir(file_path)
 	except Exception as e:
 		print("something went wrong :( there's probably no filepath. exception: ", e)
+	return os.getcwd()
 
 # executes the given command
 def exc(uinput):
 	try:
 		commands = uinput.split(PIPE)
 		#run each command and give its output to the next process
-		PipedStdout = None
+		prev_out = None
 		num_commands = len(commands)
 		for i in range(0, num_commands):
 			commands[i] = commands[i].split()
@@ -34,10 +36,10 @@ def exc(uinput):
 				p = builtins(commands[i])
 			elif i == num_commands-1:
 				#run execute function
-				p = subprocess.Popen(commands[i], stdin = PipedStdout).wait()
+				p = subprocess.Popen(commands[i], stdin = prev_out).wait()
 			else:
-				p = subprocess.Popen(commands[i], stdin = PipedStdout, stdout = subprocess.PIPE)
-				PipedStdout = p.stdout
+				p = subprocess.Popen(commands[i], stdin = prev_out, stdout = subprocess.PIPE)
+				prev_out = p.stdout
 	except Exception as e:
 		print("something went wrong :( there's probably no such command. exception: ", e)
 	return 0
@@ -45,47 +47,33 @@ def exc(uinput):
 # loop to ask for user input
 def tash_loop():
 	while True:
-		done = False
-		while not done:
+		good_uin = False
+		while not good_uin:
 			uin = input(PROMPT)
 			if len(uin) != 0:
-				done = True
-		
-		# if uin == EXIT:
-		# 	return 0
-		# # cd command (builtin)
-		# if uin[:len(CD)] == CD:
-		# 	# filepath
-		# 	fp = uin[len(CD):]
-		# 	tash_cd(fp)
-		# else:
-		# 	exc(uin)
+				good_uin = True
 		exc(uin)
 
-def builtins(UserCmd):
-	if UserCmd[0] == EXIT:
-		print("Exiting...")
+def builtins(uinput):
+	if uinput[0] == EXIT:
+		print(GOODBYE)
 		sys.exit(0)
 		return
 
-	if UserCmd[0] == CD:
-		try:
-			os.chdir(UserCmd[1])
-		except Exception:
-			print("Nope:, ", Exception)
-		return os.getcwd()	 
+	if uinput[0] == CD:
+		return tash_cd(uinput[1])
 
-	if UserCmd[0] == PWD:
+	if uinput[0] == PWD:
 		print(os.getcwd())
 		return os.getcwd()
 
-	if UserCmd[0] == 'jobs':
+	if uinput[0] == 'jobs':
 		return
 
-	if UserCmd[0] == 'bg':
+	if uinput[0] == 'bg':
 		return
 
-	if UserCmd[0] == 'fg':
+	if uinput[0] == 'fg':
 		return
 
 
