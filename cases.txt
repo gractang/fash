@@ -1,0 +1,3 @@
+# piping
+ls -l | sort -r
+sort test.txt | uniq -c | sort -r | head -3
