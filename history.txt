@@ -1,0 +1,4 @@
+ls
+prev
+prev
+exit
