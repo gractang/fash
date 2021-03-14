@@ -45,7 +45,12 @@ def exc(uinput):
 # loop to ask for user input
 def tash_loop():
 	while True:
-		uin = input(PROMPT)
+		done = False
+		while not done:
+			uin = input(PROMPT)
+			if len(uin) != 0:
+				done = True
+		
 		# if uin == EXIT:
 		# 	return 0
 		# # cd command (builtin)
