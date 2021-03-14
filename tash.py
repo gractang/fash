@@ -63,14 +63,14 @@ def builtins(UserCmd):
 		sys.exit(0)
 		return
 
-	if UserCmd[0] == "cd":
+	if UserCmd[0] == CD:
 		try:
 			os.chdir(UserCmd[1])
 		except Exception:
 			print("Nope:, ", Exception)
 		return os.getcwd()	 
 
-	if UserCmd[0] == 'pwd':
+	if UserCmd[0] == PWD:
 		print(os.getcwd())
 		return os.getcwd()
 
