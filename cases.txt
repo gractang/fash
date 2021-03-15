@@ -7,3 +7,8 @@ ls
 # piping
 ls -l | sort -r
 sort test.txt | uniq -c | sort -r | head -3
+
+# redirection
+echo hello > output.test
+cat < input.text
+sort < test.txt > sorted_file.txt
