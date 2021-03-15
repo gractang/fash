@@ -140,7 +140,6 @@ def exec(commands, flags):
 				p = subprocess.Popen(commands[entry].split(), stdin = prev_out, stdout = subprocess.PIPE)
 				prev_out = p.stdout
 				p2 = subprocess.Popen(commands[entry+1].split(), stdin = prev_out).wait()
-			#this bit below is a work in progress and should be ignored.
 			elif flags[entry] == ">":
 				p = subprocess.Popen(commands[entry].split())
 				task_in = p.communicate()[0]

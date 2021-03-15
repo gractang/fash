@@ -1,4 +1,2 @@
-ls
-prev
-prev
+ls | sort -r | more
 exit
