@@ -11,7 +11,9 @@ BG = "bg"
 FG = "fg"
 HISTORY = "prev"
 HIST_FILENAME = "history.txt"
-PIPE = " | "
+PIPE = "|"
+INPUT = "<"
+OUTPUT = ">"
 GOODBYE = "My battery is low and it's getting dark..."
 
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
@@ -109,9 +111,8 @@ def seperate_command():
 	special_chars = []
 	command_segments = []
 	#all the flagged charecters
-	special_chars_list = ["|",">","<"]
+	special_chars_list = [PIPE, INPUT, OUTPUT]
 	
-
 	command_set = []
 	for x in range(0, len(uinput)):
 		if x == len(uinput) -1:
@@ -133,20 +134,21 @@ def exec(commands, flags):
 				p = builtins(commands[0])
 	elif len(flags) == 0:
 		p = subprocess.Popen(commands[0].split())
+		print(p.communicate()[0])
 	else:
 		prev_out = None
 		for entry in range(0, len(flags)):
-			if flags[entry] == "|":
+			if flags[entry] == PIPE:
 				p = subprocess.Popen(commands[entry].split(), stdin = prev_out, stdout = subprocess.PIPE)
 				prev_out = p.stdout
 				p2 = subprocess.Popen(commands[entry+1].split(), stdin = prev_out).wait()
-			#this bit below is a work in progress and should be ignored.
-			elif flags[entry] == ">":
-				p = subprocess.Popen(commands[entry].split())
-				task_in = p.communicate()[0]
-				f = open(commands[entry + 1], "a")
-				f.write(task_in)
-				prev_out = p.stdout
+			# redirecting output
+			elif flags[entry] == OUTPUT:
+				p = subprocess.Popen(commands[entry].split(), stdout = open(commands[entry+1], "w"))
+				#prev_out = p.stdout
+			elif flags[entry] == INPUT:
+				p = subprocess.Popen(commands[entry].split(), stdin = open(commands[entry+1], "r"))
+
 				
 def main():
 	cmd, scpil = seperate_command()
