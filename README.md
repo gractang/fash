@@ -12,3 +12,4 @@ A fusion of tash and fsh — born of the great/potentially insane minds of Grace
 ### TBD— unnecessary if using shell=True
 - subcommands
 - glob notation (grac)
+- io redirection (grac)
