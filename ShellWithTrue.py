@@ -1,6 +1,7 @@
 import sys
 import os
 import subprocess
+import shlex
 
 PROMPT = "$ "
 EXIT = "exit"
@@ -13,8 +14,8 @@ HISTORY = "prev"
 HIST_FILENAME = "history.txt"
 PIPE = " | "
 GOODBYE = "My battery is low and it's getting dark..."
-
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
+
 
 def tash_cd(file_path):
 	try:
@@ -45,61 +46,28 @@ def builtins(uinput):
 	if uinput == 'fg':
 		return
 
-	# i want to do the thing where the up arrow triggers
-	# but too lazy to figure out how to implement
-	if uinput[0] == HISTORY:
-		prev = tash_prev()
-		print(prev)
-		return exc(prev)
-
 #ignore
-def seperate_command():
+def exec():
 	good_uin = False
 	while not good_uin:
 		uinput = input(PROMPT)
 		if len(uinput) != 0:
 			good_uin = True
-
-	special_chars = []
-	command_segments = []
-	#all the flagged charecters
-	special_chars_list = ["|",">","<"]
-	
-
-	command_set = []
-	for x in range(0, len(uinput)):
-		if x == len(uinput) -1:
-			command_set.append(uinput[x])
-			command_segments.append("".join(command_set).strip())
-		elif uinput[x] not in special_chars_list:
-			command_set.append(uinput[x])
-		else:
-			command_segments.append("".join(command_set).strip())
-			command_set = []
-			special_chars.append(uinput[x])
-	return command_segments, special_chars
-
-#ignore
-def exec(commands, flags):
-	good_uin = False
-	while not good_uin:
-		uinput = input(PROMPT)
-		if len(uinput) != 0:
-			good_uin = True
+	print(uinput)
 	#MAKES THE LARGE ASSUMPTION THAT ANY BUILTINS ARE PASSED IN IN ISOLATION
 	if uinput.split()[0] in BUILTINS:
 				#run builtin function	
-				p = builtins(uinput[0])
+				p = builtins(uinput.split()[0])
 	else:
+		#commented out bc it kills subprocess commands
 		#shlex.quote()
 		p2 = subprocess.Popen(uinput, shell = True)
-
-
+		print(p2.pid)
 				
 def main():
-	#cmd, scpil = seperate_command()
-	exec(cmd, scpil)
-	#tash_loop()
+	while(True):
+		exec()
+	
 	return
 
 main()
