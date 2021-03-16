@@ -18,9 +18,8 @@ HISTORY = "prev"
 HIST_FILENAME = "history.txt"
 PIPE = " | "
 GOODBYE = "My battery is low and it's getting dark..."
-BACKGROUND = "&"
+FOREGROUND = "}"
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
-#All the current running background jobs will be stored here
 processes = []
 fg = None
 
@@ -60,7 +59,7 @@ def builtins(uinput, temp = 1):
 		processes = running_processes
 		return
 	
-	if uinput[0] == 'bg':
+	if uinput[0] == BG:
 		#refreshes the list of processes
 		builtins(["jobs!"], 0)
 		for x in range(0, len(processes)):
@@ -70,7 +69,7 @@ def builtins(uinput, temp = 1):
 				processes[x] = (subprocess.Popen(processes[x][1], shell = True), processes[x][1])
 		return
 
-	if uinput[0] == 'fg':
+	if uinput[0] == FG:
 		global fg
 		#refreshes the list of processes
 		builtins(["jobs!"], 0)
@@ -91,10 +90,11 @@ def exec():
 	good_uin = False
 	while not good_uin:
 		uinput = input(PROMPT)
-		if len(uinput) != 0 and (len(uinput) != 1 and uinput[-1] != BACKGROUND):
+		if len(uinput) != 0:
 			good_uin = True
 
-	if uinput[-1] == BACKGROUND and uinput[-2] == " ":
+	if uinput[-1] == FOREGROUND and uinput[-2] == " ":
+		print("hello")
 		uinput = uinput[:-2]
 		bg_proc = False
 	#print(uinput)
@@ -107,10 +107,11 @@ def exec():
 			p = subprocess.Popen(uinput, shell = True)
 			processes.append((p, uinput))
 		else:
-			p = subprocess.Popen(shlex.quote(uinput), shell = True).wait()
+			print("9f")
+			p = subprocess.Popen(uinput, shell = True).wait()
 	return
 		#print(p.pid)
-
+				
 def kill_foreground_process(signal_received, frame):
 	if fg != None:
 		os.kill(fg.pid,signal.SIGINT)
