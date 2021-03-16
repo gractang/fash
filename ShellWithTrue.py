@@ -116,6 +116,8 @@ def kill_foreground_process(signal_received, frame):
 		os.kill(fg.pid,signal.SIGINT)
 	return
 
+def ctrl_z()	
+
 def main():
 	signal.signal(signal.SIGINT, kill_foreground_process)
 	while(True):

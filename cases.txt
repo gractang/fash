@@ -12,3 +12,8 @@ sort test.txt | uniq -c | sort -r | head -3
 echo hello > output.test
 cat < input.text
 sort < test.txt > sorted_file.txt
+
+# jobs
+jobs
+python JobsTest.py
+^C

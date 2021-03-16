@@ -14,9 +14,13 @@ HIST_FILENAME = "history.txt"
 PIPE = "|"
 INPUT = "<"
 OUTPUT = ">"
+BACKGROUND = "&"
+SPACE = " "
 GOODBYE = "My battery is low and it's getting dark..."
 
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
+bg_processes = []
+fg = None
 
 def tash_cd(file_path):
 	try:
@@ -30,6 +34,14 @@ def tash_prev():
 		for line in f:
 			pass
 	return line
+
+def check_if_bg(uinput):
+	if len(uinput) < 2:
+		return False
+	if uinput[-1] == BACKGROUND and uinput[-2] == SPACE:
+		#print("hello")
+		uinput = uinput[:-2]
+		bg_proc = False
 
 # executes the given command
 def exc(uinput):
@@ -52,12 +64,15 @@ def exc(uinput):
 				p = subprocess.Popen(commands[i], stdin = prev_out, stdout = subprocess.PIPE)
 				prev_out = p.stdout
 
+		bg_processes.append((p, uinput))
+
 	except Exception as e:
 		print("something went wrong :( there's probably no such command. exception: ", e)
 	return 0
 
 # loop to ask for user input
 def tash_loop():
+	signal.signal(signal.SIGINT, kill_foreground_process)
 	f = open(HIST_FILENAME, 'w').close()
 	while True:
 		# check to make sure that user input is not blank
@@ -84,13 +99,25 @@ def builtins(uinput):
 		print(os.getcwd())
 		return os.getcwd()
 
-	if uinput == 'jobs':
+	if uinput == JOBS:
+		global processes
+		running_processes = []
+		for entry in processes:
+
+			if entry[0].poll() == None:
+				running_processes.append(entry)
+		if temp == 1:
+			print("pid", "cmd")
+			for i in running_processes:
+			
+				print(i[0].pid, i[1])
+		processes = running_processes
 		return
 
-	if uinput == 'bg':
+	if uinput == BG:
 		return
 
-	if uinput == 'fg':
+	if uinput == FG:
 		return
 
 	# i want to do the thing where the up arrow triggers
