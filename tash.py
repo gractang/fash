@@ -148,7 +148,6 @@ def exec(commands, flags):
 				#prev_out = p.stdout
 			elif flags[entry] == INPUT:
 				p = subprocess.Popen(commands[entry].split(), stdin = open(commands[entry+1], "r"))
-
 				
 def main():
 	cmd, scpil = seperate_command()
