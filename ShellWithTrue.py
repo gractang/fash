@@ -11,7 +11,7 @@ PROMPT = "$ "
 EXIT = "exit"
 CD = "cd"
 PWD = "pwd"
-JOBS = "jobs!"
+JOBS = "jobs"
 BG = "bg"
 FG = "fg"
 HISTORY = "prev"
@@ -22,7 +22,7 @@ BACKGROUND = "&"
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
 #All the current running background jobs will be stored here
 processes = []
-fg = None
+running_foregeound_process = None
 
 def tash_cd(file_path):
 	try:
@@ -39,13 +39,13 @@ def builtins(uinput, temp = 1):
 
 	if uinput[0] == CD:
 		return tash_cd(uinput[1])
-
+		print(os.getcwd())
+	
 	if uinput[0] == PWD:
 		print(os.getcwd())
 		return os.getcwd()
 
-	if uinput[0] == 'jobs!':
-		
+	if uinput[0] == JOBS:
 		global processes
 		running_processes = []
 		for entry in processes:
@@ -62,7 +62,7 @@ def builtins(uinput, temp = 1):
 	
 	if uinput[0] == BG:
 		#refreshes the list of processes
-		builtins(["jobs!"], 0)
+		builtins([JOBS], 0)
 		for x in range(0, len(processes)):
 			if str(processes[x][0].pid) == uinput[1]:
 				processes[x][0].send_signal(signal.SIGSTOP)
@@ -73,7 +73,7 @@ def builtins(uinput, temp = 1):
 	if uinput[0] == FG:
 		global fg
 		#refreshes the list of processes
-		builtins(["jobs!"], 0)
+		builtins([JOBS], 0)
 		for x in range(0, len(processes)):
 			if str(processes[x][0].pid) == uinput[1]:
 				processes[x][0].send_signal(signal.SIGSTOP)
@@ -84,32 +84,39 @@ def builtins(uinput, temp = 1):
 				fg = None
 		return
 
-#ignore
-def exec():
+def exec(user_input, background_status):
 	global processes
-	bg_proc = True
-	good_uin = False
-	while not good_uin:
-		uinput = input(PROMPT)
-		if len(uinput) != 0 and (len(uinput) != 1 and uinput[-1] != BACKGROUND):
-			good_uin = True
-
-	if uinput[-1] == BACKGROUND and uinput[-2] == " ":
-		uinput = uinput[:-2]
-		bg_proc = False
-	#print(uinput)
+	global running_foregeound_process
 	#MAKES THE LARGE ASSUMPTION THAT ANY BUILTINS ARE PASSED IN IN ISOLATION
-	if uinput.split()[0] in BUILTINS:
+	if user_input.split()[0] in BUILTINS:
 				#run builtin function	
-				p = builtins(uinput.split())
+				p = builtins(user_input.split())
 	else:
-		if bg_proc:
-			p = subprocess.Popen(uinput, shell = True)
-			processes.append((p, uinput))
+		#if the process is a background process
+		if background_status:
+			p = subprocess.Popen(user_input, shell = True)
+			processes.append((p, user_input))
 		else:
-			p = subprocess.Popen(shlex.quote(uinput), shell = True).wait()
+			#The process is a foreground process
+			running_foregeound_process = True
+			p = subprocess.Popen(user_input, shell = True).wait()
 	return
-		#print(p.pid)
+		
+def get_user_input():
+	background_process = False
+	#Initially assuming that the user will ask for a  
+	#process incorrectly
+	good_user_input = False
+	while not good_user_input:
+		user_input = input(PROMPT)
+		#Just checking to see if the user even entered a string
+		if len(user_input) >= 2:
+			good_user_input = True
+	#seeing if the command is a background process
+	if user_input[-1] == "&" and user_input[-2] == " ":
+		background_process = True
+		user_input = user_input[:-2]
+	return (user_input, background_process)
 
 def kill_foreground_process(signal_received, frame):
 	if fg != None:
@@ -118,9 +125,13 @@ def kill_foreground_process(signal_received, frame):
 
 def main():
 	signal.signal(signal.SIGINT, kill_foreground_process)
-	while(True):
-		exec()
+	#while(True):
+		#exec()
 	
+	while(True):
+		user_input, background_status = get_user_input()
+		exec(user_input, background_status)
+
 	return
 
 main()

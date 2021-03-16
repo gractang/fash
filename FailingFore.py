@@ -113,12 +113,14 @@ def exec():
 		#print(p.pid)
 				
 def kill_foreground_process(signal_received, frame):
+	global fg
 	if fg != None:
+		print("can i gwt uh")
 		os.kill(fg.pid,signal.SIGINT)
 	return
 
 def main():
-	signal.signal(signal.SIGINT, kill_foreground_process)
+	signal.signal(signal.SIGCONT, kill_foreground_process)
 	while(True):
 		exec()
 	
