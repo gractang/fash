@@ -60,7 +60,7 @@ def builtins(uinput, temp = 1):
 		processes = running_processes
 		return
 	
-	if uinput[0] == 'bg':
+	if uinput[0] == BG:
 		#refreshes the list of processes
 		builtins(["jobs!"], 0)
 		for x in range(0, len(processes)):
@@ -70,7 +70,7 @@ def builtins(uinput, temp = 1):
 				processes[x] = (subprocess.Popen(processes[x][1], shell = True), processes[x][1])
 		return
 
-	if uinput[0] == 'fg':
+	if uinput[0] == FG:
 		global fg
 		#refreshes the list of processes
 		builtins(["jobs!"], 0)

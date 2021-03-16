@@ -147,6 +147,8 @@ def exec(commands, flags):
 				p = subprocess.Popen(commands[entry].split(), stdout = open(commands[entry+1], "w")).wait()
 				#prev_out = p.stdout
 			elif flags[entry] == INPUT:
+				p = subprocess.Popen(commands[entry].split(), stdin = open(commands[entry+1], "r"))
+
 				p = subprocess.Popen(commands[entry].split(), stdin = open(commands[entry+1], "r")).wait()
 
 				
