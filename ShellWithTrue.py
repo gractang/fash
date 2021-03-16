@@ -1,3 +1,6 @@
+from signal import SIGINT, SIGCONT, SIGSTOP
+import signal
+from sys import exit
 import sys
 import os
 import subprocess
@@ -15,8 +18,10 @@ HISTORY = "prev"
 HIST_FILENAME = "history.txt"
 PIPE = " | "
 GOODBYE = "My battery is low and it's getting dark..."
+FOREGROUND = "}"
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
 processes = []
+fg = None
 
 def tash_cd(file_path):
 	try:
@@ -25,56 +30,94 @@ def tash_cd(file_path):
 		print("something went wrong :( there's probably no filepath. exception: ", e)
 	return os.getcwd()
 
-def builtins(uinput):
-	if uinput == EXIT:
+def builtins(uinput, temp = 1):
+	if uinput[0] == EXIT:
 		print(GOODBYE)
 		sys.exit(0)
 		return
 
-	if uinput == CD:
+	if uinput[0] == CD:
 		return tash_cd(uinput[1])
 
-	if uinput == PWD:
+	if uinput[0] == PWD:
 		print(os.getcwd())
 		return os.getcwd()
 
-	if uinput == 'jobs!':
-		running_processes = [("pid", "cmd")]
+	if uinput[0] == 'jobs!':
+		
+		global processes
+		running_processes = []
 		for entry in processes:
 			if entry[0].poll() == None:
-				#ok so this plus one looks super arbitrary, but it is here for a reason
-				running_processes.append((entry[0].pid + 1, entry[1]))
-		for i in running_processes:
-			print(i)
+				
+				running_processes.append(entry)
+		if temp == 1:
+			print("pid", "cmd")
+			for i in running_processes:
+			
+				print(i[0].pid, i[1])
+		processes = running_processes
 		return
-	if uinput == 'bg':
+	
+	if uinput[0] == 'bg':
+		#refreshes the list of processes
+		builtins(["jobs!"], 0)
+		for x in range(0, len(processes)):
+			if str(processes[x][0].pid) == uinput[1]:
+				processes[x][0].send_signal(signal.SIGSTOP)
+				#exec call? would be nicer...
+				processes[x] = (subprocess.Popen(processes[x][1], shell = True), processes[x][1])
 		return
 
-	if uinput == 'fg':
+	if uinput[0] == 'fg':
+		global fg
+		#refreshes the list of processes
+		builtins(["jobs!"], 0)
+		for x in range(0, len(processes)):
+			if str(processes[x][0].pid) == uinput[1]:
+				processes[x][0].send_signal(signal.SIGSTOP)
+				#exec call? would be nicer...
+				restarted_cmd = processes[x][1]
+				processes.pop(x)
+				fg = subprocess.Popen(restarted_cmd, shell = True).wait()
+				fg = None
 		return
 
 #ignore
 def exec():
+	global processes
+	bg_proc = True
 	good_uin = False
 	while not good_uin:
 		uinput = input(PROMPT)
-		if len(uinput) != 0:
+		if len(uinput) != 0 and (len(uinput) != 1 and uinput[-1] != FOREGROUND):
 			good_uin = True
+
+	if uinput[-1] == FOREGROUND and uinput[-2] == " ":
+		uinput = uinput[:-2]
+		bg_proc = False
 	#print(uinput)
 	#MAKES THE LARGE ASSUMPTION THAT ANY BUILTINS ARE PASSED IN IN ISOLATION
 	if uinput.split()[0] in BUILTINS:
 				#run builtin function	
-				p = builtins(uinput.split()[0])
+				p = builtins(uinput.split())
 	else:
-		#commented out bc it kills subprocess commands
-		#shlex.quote()
-		p = subprocess.Popen(uinput, shell = True)
-		
-		global processes
-		processes.append((p, uinput))
+		if bg_proc:
+			p = subprocess.Popen(uinput, shell = True)
+			processes.append((p, uinput))
+		else:
+			print("9f")
+			p = subprocess.Popen(shlex.quote(uinput), shell = True).wait()
+	return
 		#print(p.pid)
 				
+def kill_foreground_process(signal_received, frame):
+	if fg != None:
+		os.kill(fg.pid,signal.SIGINT)
+	return
+
 def main():
+	signal.signal(signal.SIGINT, kill_foreground_process)
 	while(True):
 		exec()
 	
