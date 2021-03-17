@@ -23,6 +23,8 @@ BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
 
 #All the current running background jobs will be stored here
 processes = []
+zombie_processes = []
+running_foregeound_process = None
 running_foreground_process = None
 
 """
@@ -68,6 +70,18 @@ def builtins(uinput, usr = 1):
 		# the user is calling jobs, not fg or bg, then print
 		if usr == 1:
 			print("pid ", "cmd")
+		global zombie_processes
+		running_processes = []
+		for entry in processes:
+			#if process is still runnings
+			if entry[0].poll() == None:
+				print("bdhh")
+				running_processes.append(entry)
+			else:
+				print("fgeun")
+				zombie_processes.append(entry)
+		if temp == 1:
+			print("pid", "cmd")
 			for i in running_processes:
 				print(i[0].pid, i[1])
 		processes = running_processes
@@ -79,8 +93,7 @@ def builtins(uinput, usr = 1):
 		for x in range(0, len(processes)):
 			if str(processes[x][0].pid) == uinput[1]:
 				processes[x][0].send_signal(signal.SIGSTOP)
-				#exec call? would be nicer...
-				processes[x] = (subprocess.Popen(processes[x][1], shell = True), processes[x][1])
+				processes[x] = (subprocess.Popen(processes[x][1], shell = True, start_new_session = True), processes[x][1])
 		return
 
 	if uinput[0] == FG:
@@ -90,7 +103,6 @@ def builtins(uinput, usr = 1):
 		for x in range(0, len(processes)):
 			if str(processes[x][0].pid) == uinput[1]:
 				processes[x][0].send_signal(signal.SIGSTOP)
-				#exec call? would be nicer...
 				restarted_cmd = processes[x][1]
 				processes.pop(x)
 				fg = subprocess.Popen(restarted_cmd, shell = True).wait()
@@ -108,7 +120,7 @@ def exec(user_input, background_status):
 		#if the process is a background process
 		if background_status:
 			print("I am a backgrund process!")
-			p = subprocess.Popen(user_input, shell = True)
+			p = subprocess.Popen(user_input, shell = True, start_new_session = True)
 			processes.append((p, user_input))
 		else:
 			#The process is a foreground process
@@ -132,23 +144,52 @@ def get_user_input():
 		user_input = user_input[:-2]
 	return (user_input, background_process)
 
+
+def kill_foreground_process_SIGSTOP(signal_received, frame):
+	if running_foregeound_process != None:
+		os.kill(running_foregeound_process.pid,signal.SIGSTOP)
+	return
+
 #def kill_foreground_process_SIGSTOP(signal_received, frame):
 	#if running_foreground_process != None:
 		#os.kill(running_foreground_process.pid,signal.SIGSTOP)
 	#return
 
+
 def ctrl_z():
 	return	
 
 def main():
+
+	global running_foregeound_process
+	global zombie_processes
+	#signal.signal(SIGSTOP, kill_foreground_process_SIGSTOP)
+
 	global running_foreground_process
 	#signal.signal(signal.SIGSTOP, kill_foreground_process_SIGSTOP)
+
 	
 	while(True):
+		print("a")
+		builtins([JOBS], 0)
+		print(zombie_processes)
+		for entry in zombie_processes:
+			#if entry[0].poll()
+			print(entry[0].poll())
+		zombie_processes = []
 		try:
+			print("b")
 			user_input, background_status = get_user_input()
 			exec(user_input, background_status)
+			builtins([JOBS], 0)
+			print("c")
+
 		except KeyboardInterrupt:
+
+			if running_foregeound_process != None:
+				os.kill(running_foregeound_process.pid, signal.SIGINT)
+				running_foregeound_process = None
+
 			if running_foreground_process != None:
 				print("is this reached?")
 				os.kill(running_foreground_process.pid, signal.SIGINT)
