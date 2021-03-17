@@ -22,8 +22,12 @@ BACKGROUND = "&"
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
 #All the current running background jobs will be stored here
 processes = []
+<<<<<<< HEAD
 zombie_processes = []
 running_foregeound_process = None
+=======
+running_foreground_process = None
+>>>>>>> 6ea3ce75fc24a6b4dfb82d91714b8be78f7e2492
 
 def tash_cd(file_path):
 	try:
@@ -93,7 +97,7 @@ def builtins(uinput, temp = 1):
 
 def exec(user_input, background_status):
 	global processes
-	global running_foregeound_process
+	global running_foreground_process
 	#MAKES THE LARGE ASSUMPTION THAT ANY BUILTINS ARE PASSED IN IN ISOLATION
 	if user_input.split()[0] in BUILTINS:
 				#run builtin function	
@@ -106,8 +110,8 @@ def exec(user_input, background_status):
 			processes.append((p, user_input))
 		else:
 			#The process is a foreground process
-			running_foregeound_process = subprocess.Popen(user_input, shell = True).wait()
-			running_foregeound_process = None
+			running_foreground_process = subprocess.Popen(user_input, shell = True).wait()
+			running_foreground_process = None
 	return
 		
 def get_user_input():
@@ -126,18 +130,30 @@ def get_user_input():
 		user_input = user_input[:-2]
 	return (user_input, background_process)
 
+<<<<<<< HEAD
 def kill_foreground_process_SIGSTOP(signal_received, frame):
 	if running_foregeound_process != None:
 		os.kill(running_foregeound_process.pid,signal.SIGSTOP)
 	return
+=======
+#def kill_foreground_process_SIGSTOP(signal_received, frame):
+	#if running_foreground_process != None:
+		#os.kill(running_foreground_process.pid,signal.SIGSTOP)
+	#return
+>>>>>>> 6ea3ce75fc24a6b4dfb82d91714b8be78f7e2492
 
 def ctrl_z():
 	return	
 
 def main():
+<<<<<<< HEAD
 	global running_foregeound_process
 	global zombie_processes
 	#signal.signal(SIGSTOP, kill_foreground_process_SIGSTOP)
+=======
+	global running_foreground_process
+	#signal.signal(signal.SIGSTOP, kill_foreground_process_SIGSTOP)
+>>>>>>> 6ea3ce75fc24a6b4dfb82d91714b8be78f7e2492
 	
 	while(True):
 		print("a")
@@ -155,10 +171,17 @@ def main():
 			print("c")
 
 		except KeyboardInterrupt:
+<<<<<<< HEAD
 			if running_foregeound_process != None:
 				os.kill(running_foregeound_process.pid, signal.SIGINT)
 				running_foregeound_process = None
 		
+=======
+			if running_foreground_process != None:
+				print("is this reached?")
+				os.kill(running_foreground_process.pid, signal.SIGINT)
+				running_foreground_process = None
+>>>>>>> 6ea3ce75fc24a6b4dfb82d91714b8be78f7e2492
 	return
 
 main()
