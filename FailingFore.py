@@ -1,4 +1,4 @@
-from signal import SIGINT, SIGCONT, SIGSTOP
+from signal import SIGINT, SIGCONT, SIGSTOP, SIGTSTP
 import signal
 from sys import exit
 import sys
@@ -94,7 +94,7 @@ def exec():
 			good_uin = True
 
 	if uinput[-1] == FOREGROUND and uinput[-2] == " ":
-		print("hello")
+		#print("hello")
 		uinput = uinput[:-2]
 		bg_proc = False
 	#print(uinput)
@@ -112,18 +112,33 @@ def exec():
 	return
 		#print(p.pid)
 				
+# ik it looks like the parameters dont do shit but 
 def kill_foreground_process(signal_received, frame):
+<<<<<<< HEAD
+	print(fg)
+	print("hello0")
+	if fg != None:
+		print("hello")
+=======
 	global fg
 	if fg != None:
 		print("can i gwt uh")
+>>>>>>> 09f97c5bad79942cabbbbafd9e74d54c425c8fc1
 		os.kill(fg.pid,signal.SIGINT)
 	return
 
+# def suspend_process(signal_received, frame):
+# 	os.kill()
+
 def main():
+<<<<<<< HEAD
+	signal.signal(signal.SIGINT, kill_foreground_process)
+	# signal.signal(signal.SIGTSTP, suspend_process)
+=======
 	signal.signal(signal.SIGCONT, kill_foreground_process)
+>>>>>>> 09f97c5bad79942cabbbbafd9e74d54c425c8fc1
 	while(True):
 		exec()
-	
 	return
 
 main()

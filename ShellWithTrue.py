@@ -127,6 +127,9 @@ def get_user_input():
 		#os.kill(running_foregeound_process.pid,signal.SIGSTOP)
 	#return
 
+def ctrl_z():
+	return	
+
 def main():
 	global running_foregeound_process
 	#signal.signal(signal.SIGSTOP, kill_foreground_process_SIGSTOP)
