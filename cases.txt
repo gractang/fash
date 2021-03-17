@@ -6,11 +6,10 @@ ls
 
 # piping
 ls -l | sort -r
-sort test.txt | uniq -c | sort -r | head -3
 
 # redirection
-echo hello > output.test
-cat < input.text
+echo hello > output.txt
+cat < input.txt
 sort < test.txt > sorted_file.txt
 
 # jobs
