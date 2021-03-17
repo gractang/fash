@@ -1,15 +1,6 @@
-# tash
+# fash
 
-A fusion of tash and fsh — born of the great/potentially insane minds of Grace Tang and Jonathan Lutch.
+A fusion of tash and fsh — fash — born of the great/potentially insane minds of Grace Tang and Jonathan Lutch.
 
-## TODO
-- jobs (jono)
-- fg (jono)
-- bg (jono)
-- ctrl c (grac)
-- ctrl v (grac)
-- kill children (zombie)
-### TBD— unnecessary if using shell=True
-- subcommands
-- glob notation (grac)
-- io redirection (grac)
+Our design document can be found below:
+https://docs.google.com/document/d/1HOWh5qMvTpJSxM4e8qc4VdnQTAkt5sFYNnrDxmm1Xc0/edit
