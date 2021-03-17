@@ -20,24 +20,29 @@ PIPE = " | "
 GOODBYE = "My battery is low and it's getting dark..."
 BACKGROUND = "&"
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
+
 #All the current running background jobs will be stored here
 processes = []
 running_foreground_process = None
 
-def tash_cd(file_path):
-	try:
-		os.chdir(file_path)
-	except Exception as e:
-		print("something went wrong :( there's probably no filepath. exception: ", e)
-	return os.getcwd()
+"""
+Handles all the builtin functions; includes:
+- exit (exits and prints a sad exit message)
+- cd (changes the working directory)
+- pwd (prints the working directory)
+- jobs (prints the process id and the command per background process)
+- bg (restarts the job as a background process)
+- fg (restarts the job)
+"""
+def builtins(uinput, usr = 1):
 
-def builtins(uinput, temp = 1):
 	if uinput[0] == EXIT:
 		print(GOODBYE)
 		sys.exit(0)
-		return
+		return 0
 
 	if uinput[0] == CD:
+		# try changing directory; otherwise catch exception
 		try:
 			os.chdir(uinput[1])
 		except Exception as e:
@@ -50,15 +55,20 @@ def builtins(uinput, temp = 1):
 
 	if uinput[0] == JOBS:
 		global processes
+
+		# find running background processes
 		running_processes = []
 		for entry in processes:
+			# process still running
 			if entry[0].poll() == None:
-				
 				running_processes.append(entry)
-		if temp == 1:
-			print("pid", "cmd")
+			else:
+				print("hello tehre kenegal renobi")
+
+		# the user is calling jobs, not fg or bg, then print
+		if usr == 1:
+			print("pid ", "cmd")
 			for i in running_processes:
-			
 				print(i[0].pid, i[1])
 		processes = running_processes
 		return
@@ -117,7 +127,7 @@ def get_user_input():
 		if len(user_input) >= 2:
 			good_user_input = True
 	#seeing if the command is a background process
-	if user_input[-1] == "&" and user_input[-2] == " ":
+	if user_input[-1] == BACKGROUND and user_input[-2] == " ":
 		background_process = True
 		user_input = user_input[:-2]
 	return (user_input, background_process)
