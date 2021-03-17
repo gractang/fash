@@ -38,8 +38,11 @@ def builtins(uinput, temp = 1):
 		return
 
 	if uinput[0] == CD:
-		return tash_cd(uinput[1])
-		print(os.getcwd())
+		try:
+			os.chdir(uinput[1])
+		except Exception as e:
+			print("something went wrong :( there's probably no filepath. exception: ", e)
+		return os.getcwd()
 	
 	if uinput[0] == PWD:
 		print(os.getcwd())
@@ -94,12 +97,13 @@ def exec(user_input, background_status):
 	else:
 		#if the process is a background process
 		if background_status:
+			print("I am a backgrund process!")
 			p = subprocess.Popen(user_input, shell = True)
 			processes.append((p, user_input))
 		else:
 			#The process is a foreground process
-			running_foregeound_process = True
-			p = subprocess.Popen(user_input, shell = True).wait()
+			running_foregeound_process = subprocess.Popen(user_input, shell = True).wait()
+			running_foregeound_process = None
 	return
 		
 def get_user_input():
@@ -118,20 +122,24 @@ def get_user_input():
 		user_input = user_input[:-2]
 	return (user_input, background_process)
 
-def kill_foreground_process(signal_received, frame):
-	if fg != None:
-		os.kill(fg.pid,signal.SIGINT)
-	return
+#def kill_foreground_process_SIGSTOP(signal_received, frame):
+	#if running_foregeound_process != None:
+		#os.kill(running_foregeound_process.pid,signal.SIGSTOP)
+	#return
 
 def main():
-	signal.signal(signal.SIGINT, kill_foreground_process)
-	#while(True):
-		#exec()
+	global running_foregeound_process
+	#signal.signal(signal.SIGSTOP, kill_foreground_process_SIGSTOP)
 	
 	while(True):
-		user_input, background_status = get_user_input()
-		exec(user_input, background_status)
-
+		try:
+			user_input, background_status = get_user_input()
+			exec(user_input, background_status)
+		except KeyboardInterrupt:
+			if running_foregeound_process != None:
+				print("is this reached?")
+				os.kill(running_foregeound_process.pid, signal.SIGINT)
+				running_foregeound_process = None
 	return
 
 main()
