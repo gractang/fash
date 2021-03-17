@@ -20,25 +20,34 @@ PIPE = " | "
 GOODBYE = "My battery is low and it's getting dark..."
 BACKGROUND = "&"
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
+
 #All the current running background jobs will be stored here
 processes = []
 zombie_processes = []
 running_foregeound_process = None
+<<<<<<< HEAD
+=======
+running_foreground_process = None
+>>>>>>> 07b7e54cbf63ce8fdc79713015557bca438709fe
 
-def tash_cd(file_path):
-	try:
-		os.chdir(file_path)
-	except Exception as e:
-		print("something went wrong :( there's probably no filepath. exception: ", e)
-	return os.getcwd()
+"""
+Handles all the builtin functions; includes:
+- exit (exits and prints a sad exit message)
+- cd (changes the working directory)
+- pwd (prints the working directory)
+- jobs (prints the process id and the command per background process)
+- bg (restarts the job as a background process)
+- fg (restarts the job)
+"""
+def builtins(uinput, usr = 1):
 
-def builtins(uinput, temp = 1):
 	if uinput[0] == EXIT:
 		print(GOODBYE)
 		sys.exit(0)
-		return
+		return 0
 
 	if uinput[0] == CD:
+		# try changing directory; otherwise catch exception
 		try:
 			os.chdir(uinput[1])
 		except Exception as e:
@@ -51,6 +60,19 @@ def builtins(uinput, temp = 1):
 
 	if uinput[0] == JOBS:
 		global processes
+
+		# find running background processes
+		running_processes = []
+		for entry in processes:
+			# process still running
+			if entry[0].poll() == None:
+				running_processes.append(entry)
+			else:
+				print("hello tehre kenegal renobi")
+
+		# the user is calling jobs, not fg or bg, then print
+		if usr == 1:
+			print("pid ", "cmd")
 		global zombie_processes
 		running_processes = []
 		for entry in processes:
@@ -64,7 +86,6 @@ def builtins(uinput, temp = 1):
 		if temp == 1:
 			print("pid", "cmd")
 			for i in running_processes:
-			
 				print(i[0].pid, i[1])
 		processes = running_processes
 		return
@@ -121,23 +142,47 @@ def get_user_input():
 		if len(user_input) >= 2:
 			good_user_input = True
 	#seeing if the command is a background process
-	if user_input[-1] == "&" and user_input[-2] == " ":
+	if user_input[-1] == BACKGROUND and user_input[-2] == " ":
 		background_process = True
 		user_input = user_input[:-2]
 	return (user_input, background_process)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07b7e54cbf63ce8fdc79713015557bca438709fe
 def kill_foreground_process_SIGSTOP(signal_received, frame):
 	if running_foregeound_process != None:
 		os.kill(running_foregeound_process.pid,signal.SIGSTOP)
 	return
+<<<<<<< HEAD
+=======
+
+#def kill_foreground_process_SIGSTOP(signal_received, frame):
+	#if running_foreground_process != None:
+		#os.kill(running_foreground_process.pid,signal.SIGSTOP)
+	#return
+
+>>>>>>> 07b7e54cbf63ce8fdc79713015557bca438709fe
 
 def ctrl_z():
 	return	
 
 def main():
+<<<<<<< HEAD
 	global running_foregeound_process
 	global zombie_processes
 	#signal.signal(SIGSTOP, kill_foreground_process_SIGSTOP)
+=======
+
+	global running_foregeound_process
+	global zombie_processes
+	#signal.signal(SIGSTOP, kill_foreground_process_SIGSTOP)
+
+	global running_foreground_process
+	#signal.signal(signal.SIGSTOP, kill_foreground_process_SIGSTOP)
+
+>>>>>>> 07b7e54cbf63ce8fdc79713015557bca438709fe
 	
 	while(True):
 		print("a")
@@ -155,10 +200,22 @@ def main():
 			print("c")
 
 		except KeyboardInterrupt:
+<<<<<<< HEAD
 			if running_foregeound_process != None:
 				os.kill(running_foregeound_process.pid, signal.SIGINT)
 				running_foregeound_process = None
 		
+=======
+
+			if running_foregeound_process != None:
+				os.kill(running_foregeound_process.pid, signal.SIGINT)
+				running_foregeound_process = None
+
+			if running_foreground_process != None:
+				print("is this reached?")
+				os.kill(running_foreground_process.pid, signal.SIGINT)
+				running_foreground_process = None
+>>>>>>> 07b7e54cbf63ce8fdc79713015557bca438709fe
 	return
 
 main()
