@@ -146,18 +146,6 @@ def get_user_input():
 		user_input = user_input[:-2]
 	return (user_input, background_process)
 
-#def kill_foreground_process_SIGSTOP(signal_received, frame):
-	#if running_foreground_process != None:
-		#os.kill(running_foreground_process.pid,signal.SIGSTOP)
-	#return
-
-#def kill_foreground_process_SIGSTOP(signal_received, frame):
-	#if running_foreground_process != None:
-		#os.kill(running_foreground_process.pid,signal.SIGSTOP)
-	#return
-
-
-
 def main():
 	global zombie_processes
 	#signal.signal(SIGSTOP, kill_foreground_process_SIGSTOP)
