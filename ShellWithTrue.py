@@ -25,10 +25,7 @@ BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
 processes = []
 zombie_processes = []
 running_foregeound_process = None
-<<<<<<< HEAD
-=======
 running_foreground_process = None
->>>>>>> 07b7e54cbf63ce8fdc79713015557bca438709fe
 
 """
 Handles all the builtin functions; includes:
@@ -169,11 +166,10 @@ def ctrl_z():
 	return	
 
 def main():
-<<<<<<< HEAD
+
 	global running_foregeound_process
 	global zombie_processes
 	#signal.signal(SIGSTOP, kill_foreground_process_SIGSTOP)
-=======
 
 	global running_foregeound_process
 	global zombie_processes
@@ -182,8 +178,6 @@ def main():
 	global running_foreground_process
 	#signal.signal(signal.SIGSTOP, kill_foreground_process_SIGSTOP)
 
->>>>>>> 07b7e54cbf63ce8fdc79713015557bca438709fe
-	
 	while(True):
 		print("a")
 		builtins([JOBS], 0)
@@ -200,22 +194,8 @@ def main():
 			print("c")
 
 		except KeyboardInterrupt:
-<<<<<<< HEAD
-			if running_foregeound_process != None:
-				os.kill(running_foregeound_process.pid, signal.SIGINT)
-				running_foregeound_process = None
-		
-=======
 
 			if running_foregeound_process != None:
 				os.kill(running_foregeound_process.pid, signal.SIGINT)
 				running_foregeound_process = None
-
-			if running_foreground_process != None:
-				print("is this reached?")
-				os.kill(running_foreground_process.pid, signal.SIGINT)
-				running_foreground_process = None
->>>>>>> 07b7e54cbf63ce8fdc79713015557bca438709fe
-	return
-
 main()
