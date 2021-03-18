@@ -6,6 +6,7 @@ ls
 
 # piping
 ls -l | sort -r
+ls -l | grep " Mar " | wc -l
 
 # redirection
 echo hello > output.txt

@@ -103,8 +103,8 @@ def builtins(uinput, usr = 1):
 		builtins([JOBS], 0)
 		for x in range(0, len(processes)):
 			if str(processes[x][0].pid) == uinput[1]:
-				processes[x][0].send_signal(signal.SIGSTOP)
-				processes[x] = (subprocess.Popen(processes[x][1], shell = True, start_new_session = True), processes[x][1])
+				processes[x][0].send_signal(signal.SIGCONT)
+				#processes[x] = (subprocess.Popen(processes[x][1], shell = True, start_new_session = True), processes[x][1])
 		return
 
 	if uinput[0] == FG:
@@ -175,7 +175,8 @@ def main():
 
 		except KeyboardInterrupt:
 			if running_foreground_process != None:
-				os.kill(running_foreground_process.pid, signal.SIGINT)
+				#print(running_foreground_process)
+				#os.kill(running_foreground_process.pid, signal.SIGINT)
 				running_foreground_process = None
 	return
 
