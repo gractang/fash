@@ -1,5 +1,7 @@
 import time
 
 print("Starting Jobs Test")
-time.sleep(15)
+for i in range(10):
+	print(i)
+	time.sleep(1)
 print("Done with jobs test")

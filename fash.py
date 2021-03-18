@@ -1,4 +1,4 @@
-from signal import SIGINT, SIGCONT, SIGSTOP, SIGKILL
+from signal import SIGINT, SIGCONT, SIGSTOP, SIGKILL, SIGTSTP
 import signal
 from sys import exit
 import sys
@@ -25,6 +25,20 @@ BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
 processes = []
 zombie_processes = []
 running_foreground_process = None
+foreground_name = ""
+
+def handler(signal_num, frame):
+	global running_foreground_process
+	print("hello there")
+	print(running_foreground_process)
+	if running_foreground_process != None:
+		print("hello")
+		processes.append((running_foreground_process, foreground_name+" —Stopped"))
+		os.kill(running_foreground_process.pid, signal.SIGTSTP)
+		running_foreground_process = None
+		main()
+
+signal.signal(signal.SIGTSTP, handler)
 
 """
 Handles all the builtin functions; includes:
@@ -55,7 +69,6 @@ def builtins(uinput, usr = 1):
 		return os.getcwd()
 
 	if uinput[0] == JOBS:
-		
 		global processes
 
 		# find running background processes
@@ -64,10 +77,8 @@ def builtins(uinput, usr = 1):
 		for entry in processes:
 			#if process is still runnings
 			if entry[0].poll() == None:
-				#print("bdhh")
 				running_processes.append(entry)
 			else:
-				#print("fgeun")
 				zombie_processes.append(entry)
 		
 		for x in zombie_processes:
@@ -102,16 +113,19 @@ def builtins(uinput, usr = 1):
 		builtins([JOBS], 0)
 		for x in range(0, len(processes)):
 			if str(processes[x][0].pid) == uinput[1]:
-				processes[x][0].send_signal(signal.SIGSTOP)
-				restarted_cmd = processes[x][1]
-				processes.pop(x)
-				fg = subprocess.Popen(restarted_cmd, shell = True).wait()
+				processes[x][0].send_signal(signal.SIGCONT)
+				#restarted_cmd = processes[x][1]
+				#processes.pop(x)
+				#fg = subprocess.Popen(restarted_cmd, shell = True).wait()
 				fg = None
+				print("here")
+				main()
 		return
 
 def exec(user_input, background_status):
 	global processes
 	global running_foreground_process
+	global foreground_name
 	#MAKES THE LARGE ASSUMPTION THAT ANY BUILTINS ARE PASSED IN IN ISOLATION
 	if user_input.split()[0] in BUILTINS:
 				#run builtin function	
@@ -123,17 +137,20 @@ def exec(user_input, background_status):
 			processes.append((p, user_input))
 		else:
 			#The process is a foreground process
-			running_foreground_process = subprocess.Popen(user_input, shell = True).wait()
-			running_foreground_process = None
+			running_foreground_process = subprocess.Popen(user_input, shell = True)
+			print(running_foreground_process.pid)
+			foreground_name = user_input
+			running_foreground_process.wait()
 	return
 		
 def get_user_input():
-	
-
 	background_process = False
-	#Initially assuming that the user will ask for a  
-	#process incorrectly
+
+	# Initially assuming that the user will ask for a  
+	# process incorrectly
 	good_user_input = False
+
+	# keep getting user input until happy
 	while not good_user_input:
 		builtins([JOBS], 0)
 		user_input = input(PROMPT)
@@ -148,22 +165,16 @@ def get_user_input():
 
 def main():
 	global zombie_processes
-	#signal.signal(SIGSTOP, kill_foreground_process_SIGSTOP)
-
-
 	global running_foreground_process
-	#signal.signal(signal.SIGSTOP, kill_foreground_process_SIGSTOP)
 	
+	# main loop
 	while(True):
-		#builtins([JOBS], 0)
 		try:
 			user_input, background_status = get_user_input()
 			exec(user_input, background_status)
-			#builtins([JOBS], 0)
 
 		except KeyboardInterrupt:
 			if running_foreground_process != None:
-				print("is this reached?")
 				os.kill(running_foreground_process.pid, signal.SIGINT)
 				running_foreground_process = None
 	return
