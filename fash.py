@@ -109,17 +109,20 @@ def builtins(uinput, usr = 1):
 
 	if uinput[0] == FG:
 		global fg
-		#refreshes the list of processes
+		# get jobs list
 		builtins([JOBS], 0)
+
+		# loop through find job to restart
 		for x in range(0, len(processes)):
-			if str(processes[x][0].pid) == uinput[1]:
-				processes[x][0].send_signal(signal.SIGCONT)
+			p = processes[x][0]
+			if str(p.pid) == uinput[1]:
+				p.send_signal(signal.SIGCONT)
+				p.communicate()
 				#restarted_cmd = processes[x][1]
-				#processes.pop(x)
+				processes.pop(x)
 				#fg = subprocess.Popen(restarted_cmd, shell = True).wait()
 				fg = None
 				print("here")
-				main()
 		return
 
 def exec(user_input, background_status):
@@ -175,8 +178,9 @@ def main():
 
 		except KeyboardInterrupt:
 			if running_foreground_process != None:
-				#print(running_foreground_process)
-				#os.kill(running_foreground_process.pid, signal.SIGINT)
+				print("in c if")
+				print(running_foreground_process.pid)
+				running_foreground_process.send_signal(signal.SIGINT)
 				running_foreground_process = None
 	return
 
