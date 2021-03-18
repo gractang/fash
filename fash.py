@@ -22,23 +22,37 @@ BACKGROUND = "&"
 BUILTINS = [CD, PWD, JOBS, BG, FG, HISTORY, EXIT]
 
 #All the current running background jobs will be stored here
-processes = []
+bg_processes = []
 zombie_processes = []
 running_foreground_process = None
 foreground_name = ""
 
-def handler(signal_num, frame):
+def ctrlz(signal_num, frame):
 	global running_foreground_process
 	print("hello there")
 	print(running_foreground_process)
 	if running_foreground_process != None:
 		print("hello")
-		processes.append((running_foreground_process, foreground_name+" —Stopped"))
+		bg_processes.append((running_foreground_process, foreground_name+" —Stopped"))
 		os.kill(running_foreground_process.pid, signal.SIGTSTP)
 		running_foreground_process = None
 		main()
 
-signal.signal(signal.SIGTSTP, handler)
+signal.signal(signal.SIGTSTP, ctrlz)
+
+# given the pid in the second argument of uinput,
+# returns the process with the corresponding pid
+def get_process(uinput):
+	global bg_processes
+	for i in range(len(bg_processes)):
+		p = bg_processes[i][0]
+		print("pid: " + str(p.pid))
+		print("uninput pid: " + str(uinput[1]))
+		if str(p.pid) == str(uinput[1]):
+			print("pid = uinput")
+			return p
+	return None
+
 
 """
 Handles all the builtin functions; includes:
@@ -69,12 +83,12 @@ def builtins(uinput, usr = 1):
 		return os.getcwd()
 
 	if uinput[0] == JOBS:
-		global processes
+		global bg_processes
 
 		# find running background processes
 		global zombie_processes
 		running_processes = []
-		for entry in processes:
+		for entry in bg_processes:
 			#if process is still runnings
 			if entry[0].poll() == None:
 				running_processes.append(entry)
@@ -95,15 +109,18 @@ def builtins(uinput, usr = 1):
 			print("pid ", "cmd")
 			for i in running_processes:
 				print(i[0].pid, i[1])
-		processes = running_processes
+		bg_processes = running_processes
 		return
 	
 	if uinput[0] == BG:
 		#refreshes the list of processes
 		builtins([JOBS], 0)
-		for x in range(0, len(processes)):
-			if str(processes[x][0].pid) == uinput[1]:
-				processes[x][0].send_signal(signal.SIGCONT)
+		p = get_process(uinput)
+		print(p.pid)
+		p.send_signal(signal.SIGCONT)
+		# for x in range(0, len(bg_processes)):
+		# 	if str(bg_processes[x][0].pid) == uinput[1]:
+		# 		bg_processes[x][0].send_signal(signal.SIGCONT)
 				#processes[x] = (subprocess.Popen(processes[x][1], shell = True, start_new_session = True), processes[x][1])
 		return
 
@@ -113,20 +130,20 @@ def builtins(uinput, usr = 1):
 		builtins([JOBS], 0)
 
 		# loop through find job to restart
-		for x in range(0, len(processes)):
-			p = processes[x][0]
+		for x in range(0, len(bg_processes)):
+			p = bg_processes[x][0]
 			if str(p.pid) == uinput[1]:
 				p.send_signal(signal.SIGCONT)
 				p.communicate()
 				#restarted_cmd = processes[x][1]
-				processes.pop(x)
+				bg_processes.pop(x)
 				#fg = subprocess.Popen(restarted_cmd, shell = True).wait()
 				fg = None
 				print("here")
 		return
 
 def exec(user_input, background_status):
-	global processes
+	global bg_processes
 	global running_foreground_process
 	global foreground_name
 	#MAKES THE LARGE ASSUMPTION THAT ANY BUILTINS ARE PASSED IN IN ISOLATION
@@ -137,7 +154,7 @@ def exec(user_input, background_status):
 		#if the process is a background process
 		if background_status:
 			p = subprocess.Popen(user_input, shell = True, start_new_session = True)
-			processes.append((p, user_input))
+			bg_processes.append((p, user_input))
 		else:
 			#The process is a foreground process
 			running_foreground_process = subprocess.Popen(user_input, shell = True)

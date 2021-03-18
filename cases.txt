@@ -17,3 +17,23 @@ sort < test.txt > sorted_file.txt
 jobs
 python JobsTest.py
 ^C
+
+
+# tylers test script
+#!/bin/sh
+while read line
+do
+    echo "GOATS: "
+    $line
+done < inputs.txt > goals.txt
+echo "GOATS: " >> goals.txt
+python3 main.py < inputs.txt > outputs.txt
+python3 test_extras.py
+ls
+cd .
+ls
+pwd
+jobs
+echo dog
+echo dog | echo
+exit
